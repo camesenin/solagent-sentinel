@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Sparkles, ExternalLink, Github } from 'lucide-react';
+import { WalletButton } from './WalletButton';
 
 export const Navbar: React.FC = () => {
   return (
@@ -36,6 +37,9 @@ export const Navbar: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Colosseum Fall 2026</span>
           </div>
+
+          {/* Wallet Connection */}
+          <WalletButton />
 
           <a
             href="https://github.com/camesenin/solagent-sentinel"

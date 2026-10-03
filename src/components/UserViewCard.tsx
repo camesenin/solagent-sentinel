@@ -2,6 +2,7 @@ import React from 'react';
 import { SecurityAuditReport } from '../lib/sentinel-core/types';
 import { BalanceSimulationWidget } from './BalanceSimulationWidget';
 import { CheckCircle2, AlertOctagon, HelpCircle, ShieldAlert } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface Props {
   report: SecurityAuditReport;
@@ -9,6 +10,8 @@ interface Props {
 
 export const UserViewCard: React.FC<Props> = ({ report }) => {
   const { humanSummary, threats, balanceChanges, riskLevel } = report;
+  const { language } = useLanguage();
+  const isEn = language === 'en';
 
   return (
     <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-sm">
@@ -36,7 +39,7 @@ export const UserViewCard: React.FC<Props> = ({ report }) => {
       {threats.length > 0 && (
         <div className="pt-4 border-t border-neutral-800 space-y-3">
           <div className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-            <ShieldAlert className="w-4 h-4" /> Alertas de Seguridad Detectadas
+            <ShieldAlert className="w-4 h-4" /> {isEn ? 'Detected Security Alerts' : 'Alertas de Seguridad Detectadas'}
           </div>
           <div className="space-y-2.5">
             {threats.map((t, idx) => (
@@ -52,7 +55,7 @@ export const UserViewCard: React.FC<Props> = ({ report }) => {
                   {t.description}
                 </div>
                 <div className="mt-2 text-xs font-semibold text-rose-400/90 bg-black/40 p-2 rounded-lg border border-rose-500/20">
-                  💡 Qué debes hacer: {t.mitigationRecommendation}
+                  💡 {isEn ? 'Recommended Action:' : 'Qué debes hacer:'} {t.mitigationRecommendation}
                 </div>
               </div>
             ))}
@@ -64,7 +67,11 @@ export const UserViewCard: React.FC<Props> = ({ report }) => {
       <div className="pt-4 border-t border-neutral-800 flex items-center justify-between text-xs text-neutral-400">
         <div className="flex items-center gap-1.5">
           <HelpCircle className="w-4 h-4 text-neutral-500" />
-          <span>Protegido por el estándar de verificación SolAgent Sentinel v1.0</span>
+          <span>
+            {isEn
+              ? 'Secured by SolAgent Sentinel v1.0 verification standard'
+              : 'Protegido por el estándar de verificación SolAgent Sentinel v1.0'}
+          </span>
         </div>
         <div className="font-mono text-neutral-500">
           Ref: {report.signatureOrHash.slice(0, 12)}...

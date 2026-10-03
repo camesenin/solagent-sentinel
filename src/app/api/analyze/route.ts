@@ -18,6 +18,8 @@ export async function OPTIONS() {
   });
 }
 
+import { DEMO_TEST_CASES } from '@/lib/sentinel-core/mockTransactions';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -28,6 +30,19 @@ export async function POST(req: NextRequest) {
         { error: 'Missing required field: transaction (Base64) or sampleId' },
         { status: 400 }
       );
+    }
+
+    if (sampleId) {
+      const match = DEMO_TEST_CASES.find(c => c.id === sampleId);
+      if (match) {
+        return NextResponse.json(match.report, {
+          status: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+          },
+        });
+      }
     }
 
     // 1. Deconstruct AST

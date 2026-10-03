@@ -47,6 +47,21 @@ export function detectExploitPatterns(instructions: DecodedInstruction[]): Threa
       ix.riskTag = 'MALICIOUS';
     }
 
+    // 1.5 Check for System Program Assign (Account Hijack)
+    if (ix.programId === '11111111111111111111111111111111' && (ix.instructionType === 'Assign' || ix.instructionType === 'AssignWithSeed')) {
+      threats.push({
+        id: 'SYSTEM_ASSIGN_TAKEOVER',
+        severity: 'CRITICAL',
+        title: 'Ataque de Secuestro de Cuenta del Sistema (System::Assign)',
+        description: 'La transacción intenta cambiar el programa propietario de tu cuenta a un smart contract externo no verificado.',
+        technicalDetails: `SystemProgram::${ix.instructionType} targeting signer account. Reassigning owner to an untrusted contract.`,
+        mitigationRecommendation: 'BLOQUEO TOTAL. Modificar el propietario de tu cuenta permite al atacante drenar todos los fondos futuros.',
+        programId: ix.programId,
+        instructionIndex: ix.index,
+      });
+      ix.riskTag = 'MALICIOUS';
+    }
+
     // 2. Check for Unlimited Approve (infinite token allowance drainer)
     if (
       (ix.programId === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' ||

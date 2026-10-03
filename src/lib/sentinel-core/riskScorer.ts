@@ -10,13 +10,13 @@ export function calculateRiskScore(
   for (const t of threats) {
     switch (t.severity) {
       case 'CRITICAL':
-        score -= 75;
+        score -= 85;
         break;
       case 'HIGH':
-        score -= 35;
+        score -= 40;
         break;
       case 'MEDIUM':
-        score -= 15;
+        score -= 20;
         break;
       case 'LOW':
         score -= 5;

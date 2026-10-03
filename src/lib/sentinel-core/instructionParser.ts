@@ -38,7 +38,11 @@ export function parseTransactionFromBase64(base64Payload: string): {
         let instructionType = 'CustomInvocation';
         const params: Record<string, any> = {};
 
-        if (programId === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' && ix.data.length > 0) {
+        if (
+          (programId === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' ||
+            programId === 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb') &&
+          ix.data.length > 0
+        ) {
           const typeCode = ix.data[0];
           switch (typeCode) {
             case 3:
@@ -57,11 +61,17 @@ export function parseTransactionFromBase64(base64Payload: string): {
             case 8:
               instructionType = 'Burn';
               break;
+            case 9:
+              instructionType = 'CloseAccount';
+              break;
             case 12:
               instructionType = 'TransferChecked';
               break;
             case 13:
               instructionType = 'ApproveChecked';
+              break;
+            case 17:
+              instructionType = 'SyncNative';
               break;
             default:
               instructionType = `TokenInstruction_${typeCode}`;
@@ -72,8 +82,21 @@ export function parseTransactionFromBase64(base64Payload: string): {
             case 0:
               instructionType = 'CreateAccount';
               break;
+            case 1:
+              instructionType = 'Assign';
+              params.assignedProgram = 'ExternalProgramTarget';
+              break;
             case 2:
               instructionType = 'Transfer';
+              break;
+            case 3:
+              instructionType = 'CreateAccountWithSeed';
+              break;
+            case 8:
+              instructionType = 'Allocate';
+              break;
+            case 10:
+              instructionType = 'AssignWithSeed';
               break;
             default:
               instructionType = `SystemInstruction_${typeCode}`;

@@ -12,6 +12,7 @@ pub mod sentinel_registry {
         registry.authority = ctx.accounts.authority.key();
         registry.total_attestations = 0;
         registry.total_blocked_threats = 0;
+        registry.total_blacklisted = 0;
         msg!("SolAgent Sentinel Registry initialized by authority: {}", registry.authority);
         Ok(())
     }
@@ -34,9 +35,9 @@ pub mod sentinel_registry {
         attestation.is_blocked = is_blocked;
         attestation.timestamp = Clock::get()?.unix_timestamp;
 
-        registry.total_attestations = registry.total_attestations.checked_add(1).unwrap();
+        registry.total_attestations = registry.total_attestations.checked_add(1).ok_or(ErrorCode::Overflow)?;
         if is_blocked {
-            registry.total_blocked_threats = registry.total_blocked_threats.checked_add(1).unwrap();
+            registry.total_blocked_threats = registry.total_blocked_threats.checked_add(1).ok_or(ErrorCode::Overflow)?;
         }
 
         msg!(
@@ -47,11 +48,30 @@ pub mod sentinel_registry {
         );
         Ok(())
     }
-}
 
-#[derive(Accounts)]
-pub fn InitializeRegistry<'info>(ctx: Context<InitializeRegistry>) -> Result<()> {
-    Ok(())
+    /// Add a malicious wallet, drainer program or compromised authority to the on-chain threat blacklist
+    pub fn blacklist_threat(
+        ctx: Context<BlacklistThreat>,
+        malicious_key: Pubkey,
+        severity: u8,
+        reason: String,
+    ) -> Result<()> {
+        require!(reason.len() <= 64, ErrorCode::ReasonTooLong);
+
+        let threat = &mut ctx.accounts.threat_record;
+        let registry = &mut ctx.accounts.registry;
+
+        threat.malicious_key = malicious_key;
+        threat.reporter = ctx.accounts.authority.key();
+        threat.severity = severity;
+        threat.reason = reason;
+        threat.timestamp = Clock::get()?.unix_timestamp;
+
+        registry.total_blacklisted = registry.total_blacklisted.checked_add(1).ok_or(ErrorCode::Overflow)?;
+
+        msg!("Threat signature blacklisted on-chain: key={}, severity={}", malicious_key, severity);
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -59,7 +79,7 @@ pub struct InitializeRegistry<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 8 + 8 + 64,
+        space = 8 + 32 + 8 + 8 + 8 + 64,
         seeds = [b"sentinel_registry"],
         bump
     )]
@@ -91,11 +111,35 @@ pub struct RecordAttestation<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(malicious_key: Pubkey)]
+pub struct BlacklistThreat<'info> {
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + 32 + 32 + 1 + 4 + 64 + 8,
+        seeds = [b"threat", malicious_key.as_ref()],
+        bump
+    )]
+    pub threat_record: Account<'info, ThreatRecord>,
+    #[account(
+        mut,
+        has_one = authority,
+        seeds = [b"sentinel_registry"],
+        bump
+    )]
+    pub registry: Account<'info, GlobalRegistry>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct GlobalRegistry {
     pub authority: Pubkey,
     pub total_attestations: u64,
     pub total_blocked_threats: u64,
+    pub total_blacklisted: u64,
 }
 
 #[account]
@@ -106,4 +150,21 @@ pub struct AttestationRecord {
     pub threat_count: u8,
     pub is_blocked: bool,
     pub timestamp: i64,
+}
+
+#[account]
+pub struct ThreatRecord {
+    pub malicious_key: Pubkey,
+    pub reporter: Pubkey,
+    pub severity: u8,
+    pub reason: String,
+    pub timestamp: i64,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Calculation resulted in numerical overflow")]
+    Overflow,
+    #[msg("Threat reason description exceeds 64 characters limit")]
+    ReasonTooLong,
 }

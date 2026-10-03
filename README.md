@@ -3,11 +3,15 @@
 > **Autonomous AI Agent & Blinks Security Runtime Protocol for Solana**  
 > Built for the **Colosseum Hackathon — Crypto World's Fair (Fall 2026)**
 
+[![Live Demo](https://img.shields.io/badge/Demo-solagent--sentinel.vercel.app-14F195?logo=vercel)](https://solagent-sentinel.vercel.app)
 [![Solana Devnet](https://img.shields.io/badge/Solana-Devnet%20Verified-14F195?logo=solana&logoColor=black)](https://explorer.solana.com/?cluster=devnet)
 [![Colosseum Hackathon](https://img.shields.io/badge/Colosseum-Fall%202026-9945FF)](https://colosseum.com)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14.2-000000?logo=next.js)](https://nextjs.org)
 [![Anchor Framework](https://img.shields.io/badge/Anchor-0.30.1-blue)](https://www.anchor-lang.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> 🚀 **Live Production URL**: [https://solagent-sentinel.vercel.app](https://solagent-sentinel.vercel.app)  
+> 🔗 **GitHub Repository**: [https://github.com/camesenin/solagent-sentinel](https://github.com/camesenin/solagent-sentinel)
 
 ---
 

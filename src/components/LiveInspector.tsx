@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { DEMO_TEST_CASES, TestCase } from '../lib/sentinel-core/mockTransactions';
 import { SecurityAuditReport } from '../lib/sentinel-core/types';
@@ -5,8 +7,10 @@ import { SecurityShieldBadge } from './SecurityShieldBadge';
 import { UserViewCard } from './UserViewCard';
 import { AuditorViewCard } from './AuditorViewCard';
 import { Search, ShieldAlert, CheckCircle, AlertTriangle, Eye, Terminal } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const LiveInspector: React.FC = () => {
+  const { t, language } = useLanguage();
   const [selectedCase, setSelectedCase] = useState<TestCase>(DEMO_TEST_CASES[0]);
   const [customInput, setCustomInput] = useState('');
   const [activeTab, setActiveTab] = useState<'USER' | 'AUDITOR'>('USER');
@@ -25,10 +29,16 @@ export const LiveInspector: React.FC = () => {
     if (!customInput.trim()) return;
     setIsScanning(true);
     setTimeout(() => {
-      // If contains fake or claim, trigger drainer
-      if (customInput.toLowerCase().includes('airdrop') || customInput.toLowerCase().includes('claim') || customInput.toLowerCase().includes('fake')) {
+      if (
+        customInput.toLowerCase().includes('airdrop') ||
+        customInput.toLowerCase().includes('claim') ||
+        customInput.toLowerCase().includes('fake')
+      ) {
         setSelectedCase(DEMO_TEST_CASES[1]);
-      } else if (customInput.toLowerCase().includes('approve') || customInput.toLowerCase().includes('yield')) {
+      } else if (
+        customInput.toLowerCase().includes('approve') ||
+        customInput.toLowerCase().includes('yield')
+      ) {
         setSelectedCase(DEMO_TEST_CASES[2]);
       } else {
         setSelectedCase(DEMO_TEST_CASES[0]);
@@ -37,22 +47,63 @@ export const LiveInspector: React.FC = () => {
     }, 350);
   };
 
+  // Helper to get localized scenario info
+  const getScenarioInfo = (id: string) => {
+    if (id === 'safe-jupiter-swap') return t.scenarios.s1;
+    if (id === 'critical-set-authority-drainer') return t.scenarios.s2;
+    return t.scenarios.s3;
+  };
+
+  const activeScenario = getScenarioInfo(selectedCase.id);
+
+  // Overlay localized summary strings
+  const localizedReport: SecurityAuditReport = {
+    ...selectedCase.report,
+    humanSummary: {
+      actionHeadline: activeScenario.headline,
+      narrative: activeScenario.narrative,
+      riskVerdict: activeScenario.verdict,
+      safeguardBadge: activeScenario.badge,
+    },
+    threats: selectedCase.report.threats.map((threat, idx) => {
+      if (selectedCase.id === 'critical-set-authority-drainer' && 'threatTitle' in activeScenario) {
+        return {
+          ...threat,
+          title: (activeScenario as any).threatTitle || threat.title,
+          description: (activeScenario as any).threatDesc || threat.description,
+          mitigationRecommendation: (activeScenario as any).mitigation || threat.mitigationRecommendation,
+        };
+      }
+      if (selectedCase.id === 'unlimited-token-delegation' && 'threatTitle' in activeScenario) {
+        return {
+          ...threat,
+          title: (activeScenario as any).threatTitle || threat.title,
+          description: (activeScenario as any).threatDesc || threat.description,
+          mitigationRecommendation: (activeScenario as any).mitigation || threat.mitigationRecommendation,
+        };
+      }
+      return threat;
+    }),
+  };
+
   return (
     <section className="space-y-8 max-w-5xl mx-auto">
       {/* Test Scenarios Selector */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-            Casos de Prueba en Vivo (Selecciona para Inspeccionar)
+            {t.inspector.scenariosTitle}
           </span>
           <span className="text-xs text-solana-green font-mono">
-            3 Escenarios Pre-configurados
+            {t.inspector.scenariosCount}
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {DEMO_TEST_CASES.map(tc => {
             const isSelected = selectedCase.id === tc.id;
+            const scInfo = getScenarioInfo(tc.id);
+
             return (
               <button
                 key={tc.id}
@@ -84,10 +135,10 @@ export const LiveInspector: React.FC = () => {
                   {tc.report.riskLevel === 'SAFE' && <CheckCircle className="w-4 h-4 text-emerald-400" />}
                 </div>
                 <div className="text-sm font-bold text-white mb-1">
-                  {tc.name}
+                  {scInfo.name}
                 </div>
                 <p className="text-xs text-neutral-400 line-clamp-2">
-                  {tc.description}
+                  {scInfo.desc}
                 </p>
               </button>
             );
@@ -98,7 +149,7 @@ export const LiveInspector: React.FC = () => {
       {/* Input Box for Custom Blink URL or Tx */}
       <div className="p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800 space-y-3 shadow-lg">
         <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider block">
-          Inspeccionar Blink URL o Transacción Solana (Base64)
+          {t.inspector.inputLabel}
         </label>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
@@ -107,7 +158,7 @@ export const LiveInspector: React.FC = () => {
               type="text"
               value={customInput}
               onChange={e => setCustomInput(e.target.value)}
-              placeholder="Pega un enlace de Blink (dial.to / solana-action:) o Payload Base64..."
+              placeholder={t.inspector.inputPlaceholder}
               className="w-full bg-black/60 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-solana-green font-mono"
             />
           </div>
@@ -116,7 +167,7 @@ export const LiveInspector: React.FC = () => {
             disabled={isScanning}
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-solana-green to-teal-400 hover:opacity-90 text-black font-extrabold text-xs tracking-wider uppercase transition disabled:opacity-50"
           >
-            {isScanning ? 'Analizando AST...' : 'Escanear Ahora'}
+            {isScanning ? 'Analyzing AST...' : t.inspector.scanBtn}
           </button>
         </div>
       </div>
@@ -124,7 +175,7 @@ export const LiveInspector: React.FC = () => {
       {/* View Toggle (360 Perspective switch) */}
       <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
         <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-          Resultado del Análisis de Seguridad
+          {t.inspector.resultsTitle}
         </div>
 
         <div className="inline-flex p-1 rounded-xl bg-neutral-900 border border-neutral-800">
@@ -137,7 +188,7 @@ export const LiveInspector: React.FC = () => {
             }`}
           >
             <Eye className="w-3.5 h-3.5 text-solana-green" />
-            <span>Modo Usuario Común</span>
+            <span>{t.inspector.tabUser}</span>
           </button>
           <button
             onClick={() => setActiveTab('AUDITOR')}
@@ -148,7 +199,7 @@ export const LiveInspector: React.FC = () => {
             }`}
           >
             <Terminal className="w-3.5 h-3.5 text-purple-400" />
-            <span>Modo Auditor / Ingeniero</span>
+            <span>{t.inspector.tabAuditor}</span>
           </button>
         </div>
       </div>
@@ -158,23 +209,23 @@ export const LiveInspector: React.FC = () => {
         <div className="p-16 rounded-2xl bg-neutral-900/40 border border-neutral-800 text-center space-y-3">
           <div className="w-8 h-8 rounded-full border-2 border-solana-green border-t-transparent animate-spin mx-auto" />
           <p className="text-xs font-mono text-neutral-400">
-            Deconstruyendo AST de instrucciones y simulando estado en Solana Devnet...
+            {t.inspector.scanningText}
           </p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Main Shield Badge */}
           <SecurityShieldBadge
-            score={selectedCase.report.score}
-            riskLevel={selectedCase.report.riskLevel}
-            badgeText={selectedCase.report.humanSummary.safeguardBadge}
+            score={localizedReport.score}
+            riskLevel={localizedReport.riskLevel}
+            badgeText={localizedReport.humanSummary.safeguardBadge}
           />
 
           {/* Dual Perspective Content */}
           {activeTab === 'USER' ? (
-            <UserViewCard report={selectedCase.report} />
+            <UserViewCard report={localizedReport} />
           ) : (
-            <AuditorViewCard report={selectedCase.report} />
+            <AuditorViewCard report={localizedReport} />
           )}
         </div>
       )}

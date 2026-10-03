@@ -1,16 +1,21 @@
+'use client';
+
 import React from 'react';
 import { BalanceChange } from '../lib/sentinel-core/types';
 import { ArrowDownRight, ArrowUpRight, Coins } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface Props {
   changes: BalanceChange[];
 }
 
 export const BalanceSimulationWidget: React.FC<Props> = ({ changes }) => {
+  const { t } = useLanguage();
+
   if (!changes || changes.length === 0) {
     return (
       <div className="bg-black/30 border border-white/10 rounded-xl p-4 text-center text-sm text-neutral-400">
-        Sin cambios proyectados de balance en tokens o SOL.
+        {t.balanceWidget.noChange}
       </div>
     );
   }
@@ -18,9 +23,9 @@ export const BalanceSimulationWidget: React.FC<Props> = ({ changes }) => {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs font-bold text-neutral-400 uppercase tracking-wider">
-        <span>Impacto Simulado en tu Billetera</span>
+        <span>{t.balanceWidget.title}</span>
         <span className="flex items-center gap-1 text-emerald-400">
-          <Coins className="w-3.5 h-3.5" /> Simulación de Balance
+          <Coins className="w-3.5 h-3.5" /> {t.balanceWidget.badge}
         </span>
       </div>
 
@@ -46,7 +51,7 @@ export const BalanceSimulationWidget: React.FC<Props> = ({ changes }) => {
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-neutral-400">
-                    {isNegative ? 'Entregas (Sale)' : 'Recibes (Entra)'}
+                    {isNegative ? t.balanceWidget.gives : t.balanceWidget.receives}
                   </div>
                   <div className="text-base font-extrabold text-white">
                     {c.symbol}
@@ -59,7 +64,7 @@ export const BalanceSimulationWidget: React.FC<Props> = ({ changes }) => {
                   {c.change > 0 ? `+${c.change}` : c.change}
                 </div>
                 {c.changeUsd !== undefined && (
-                  <div className="text-xs text-neutral-400 font-mono">
+                  <div className="text-[11px] font-mono text-neutral-500">
                     ≈ ${Math.abs(c.changeUsd).toFixed(2)} USD
                   </div>
                 )}

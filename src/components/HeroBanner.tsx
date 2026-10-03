@@ -1,24 +1,28 @@
+'use client';
+
 import React from 'react';
 import { ShieldCheck, Zap, Lock, Cpu } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const HeroBanner: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="text-center py-10 sm:py-14 space-y-6 max-w-4xl mx-auto">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 shadow-md">
         <span className="w-2 h-2 rounded-full bg-solana-green" />
-        <span>Capa de Verificación en Tiempo de Ejecución para Agentes de IA y Solana Blinks</span>
+        <span>{t.hero.pill}</span>
       </div>
 
       <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-        Protege tus Fondos Contra <br />
+        {t.hero.titleStart} <br />
         <span className="bg-gradient-to-r from-solana-green via-teal-300 to-solana-purple bg-clip-text text-transparent">
-          Drainers y Permisos Ocultos
+          {t.hero.titleHighlight}
         </span>
       </h1>
 
       <p className="text-sm sm:text-base text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-        SolAgent Sentinel analiza el AST completo de transacciones en Solana antes de la firma. Detecta intentos de{' '}
-        <span className="text-neutral-200 font-semibold">SetAuthority</span>, aprobaciones infinitas y trampas en Blinks, traduciendo cada instrucción a lenguaje humano con atestación on-chain.
+        {t.hero.subtitle}
       </p>
 
       {/* Feature Pills */}

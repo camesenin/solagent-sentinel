@@ -1,0 +1,19 @@
+[package]
+name = "sentinel_registry"
+version = "0.1.0"
+description = "On-chain security attestation and drainer registry for SolAgent Sentinel"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "sentinel_registry"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"

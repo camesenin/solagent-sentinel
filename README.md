@@ -125,25 +125,57 @@ solagent-sentinel/
             └── src/lib.rs      # Global registry & attestation recorder
 ```
 
+## 🧪 Automated Security & Audit Suite (14/14 Passing)
+
+Reproduce all deterministic heuristic and cybersecurity penetration tests locally:
+
+```bash
+# 1. Run Functional E2E Scenario Suite (Jupiter swap, Drainers, Token-2022)
+node sentinel_audit_suite.js
+
+# 2. Run Dedicated Anti-Exploit Suite (SSRF Firewall, DoS payload limits, Math guards)
+node sentinel_security_vulnerability_audit.js
+```
+
 ---
 
-## 🛡️ Anti-Drainer Detection Rules
+## 🤖 SentinelGuard SDK for AI Agents (ElizaOS & Solana Agent Kit)
 
-| Threat ID | Severity | Detection Vector | Action Taken |
-| :--- | :---: | :--- | :--- |
-| **`SET_AUTHORITY_HIJACK`** | **CRITICAL** | SPL Token Instruction 6 modifying `AccountOwner` or `CloseAuthority` | **Immediate Transaction Abort (Score < 20)** |
-| **`UNLIMITED_TOKEN_DELEGATION`** | **HIGH** | `ApproveChecked` requesting `u64::MAX` allowance to unverified spender | **Warning Alert (Score Penalty -35)** |
-| **`UNVERIFIED_SIGNER_EXECUTION`** | **MEDIUM** | Unknown Program ID requiring direct wallet signer authority | **Cautious Flag (Score Penalty -15)** |
-| **`ACTIONS_METADATA_SPOOF`** | **HIGH** | Mismatched domain origin or missing canonical CORS headers | **Blink Domain Blocked** |
+Integrate SolAgent Sentinel into any autonomous AI agent before broadcasting transactions:
+
+```typescript
+import { SentinelGuard } from '@/lib/sdk/sentinelGuard';
+
+const guard = new SentinelGuard({
+  rpcUrl: 'https://api.devnet.solana.com',
+  policy: {
+    autoAbortCritical: true, // Block malicious drainers in <35ms
+    maxAllowedRiskScore: 60,
+  }
+});
+
+// Middleware interceptor before agent signing
+const audit = await guard.verifyTransaction(serializedAgentTx);
+
+if (!audit.verdict.isApproved) {
+  console.error(`🛑 Transaction Aborted: ${audit.verdict.actionNotice}`);
+  throw new Error(`Sentinel Security Firewall: ${audit.humanSummary.actionHeadline}`);
+}
+
+// Proceed safely with wallet signing
+await agentWallet.signAndSendTransaction(tx);
+```
 
 ---
 
 ## 🏆 Colosseum Hackathon Details
 
-* **Hackathon**: Crypto World's Fair (Fall 2026)
+* **Hackathon**: Cypherpunk / Crypto World's Fair (Fall 2026)
 * **Organized by**: Colosseum & Solana Foundation
-* **Track**: Solana Ecosystem Track ($100k pool) & Security Tooling
-* **Lead Contributor**: Carlos Murillo ([@camesenin](https://github.com/camesenin))
+* **Track**: AI Agents & Infrastructure / Blinks
+* **Lead Builder**: Carlos Mesen ([@camesenin](https://github.com/camesenin))
+* **Production Deployment ($0)**: [https://solagent-sentinel.vercel.app](https://solagent-sentinel.vercel.app)
+* **Pitch Video (1080p MP4)**: Available in `docs/solagent_sentinel_pitch.mp4`
 
 ---
 

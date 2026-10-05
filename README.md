@@ -135,7 +135,12 @@ node sentinel_audit_suite.js
 
 # 2. Run Dedicated Anti-Exploit Suite (SSRF Firewall, DoS payload limits, Math guards)
 node sentinel_security_vulnerability_audit.js
+
+# 3. Run Micro-Benchmark Suite (<0.05ms deterministic AST evaluation)
+node autonomous_agent_integration_benchmark.js
 ```
+
+See [BENCHMARK.md](./BENCHMARK.md) for detailed performance methodology, hardware specifications, and reproducible stress metrics.
 
 ---
 

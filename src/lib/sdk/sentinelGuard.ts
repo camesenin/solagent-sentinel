@@ -59,7 +59,7 @@ export class SentinelGuard {
       throw new Error('Invalid transaction payload: expected non-empty base64 string');
     }
 
-    // 1. Deconstruct AST
+    // 1. Decompile wire format instructions and accounts
     const { instructions, accounts, signatureOrHash } = parseTransactionFromBase64(txBase64);
 
     // 2. Run deterministic exploit detectors
@@ -72,13 +72,19 @@ export class SentinelGuard {
     if (this.connection) {
       try {
         const rawBuf = Buffer.from(txBase64, 'base64');
-        const vTx = VersionedTransaction.deserialize(rawBuf);
-        const simRes = await this.connection.simulateTransaction(vTx, {
-          replaceRecentBlockhash: true,
-          sigVerify: false,
-        });
+        let simRes;
+        try {
+          const vTx = VersionedTransaction.deserialize(rawBuf);
+          simRes = await this.connection.simulateTransaction(vTx, {
+            replaceRecentBlockhash: true,
+            sigVerify: false,
+          });
+        } catch {
+          const legTx = Transaction.from(rawBuf);
+          simRes = await this.connection.simulateTransaction(legTx);
+        }
 
-        if (simRes.value.err) {
+        if (simRes?.value?.err) {
           // If simulation fails on-chain, penalize as suspicious execution error
           threats.push({
             id: 'SIMULATION_EXECUTION_FAILURE',
@@ -90,7 +96,7 @@ export class SentinelGuard {
           });
         }
       } catch {
-        // Simulation error handled silently; static AST remains the primary deterministic truth
+        // Simulation error handled gracefully; deterministic static analysis remains the primary baseline
       }
     }
 
@@ -113,7 +119,7 @@ export class SentinelGuard {
       instructions,
       accountsInvolved: accounts,
       onChainAttestation: {
-        verifiedInRegistry: true,
+        verifiedInRegistry: false, // Pre-flight evaluation completed off-chain; set true only upon on-chain attestation transaction
         registryProgramId: 'Sent777777777777777777777777777777777777777',
         attestationHash: `sha256:${Buffer.from(signatureOrHash).toString('hex').slice(0, 16)}`,
         timestamp: Date.now(),

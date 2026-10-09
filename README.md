@@ -27,11 +27,11 @@ As **AI Agents** (via Solana Agent Kit, Eliza, LangChain) and **Solana Actions &
 ## 💡 The Solution: SolAgent Sentinel
 
 **SolAgent Sentinel** is an open-source, deterministic runtime security shield and attestation protocol that:
-* **Deconstructs the Transaction AST**: Intercepts instructions before signing to detect `SetAuthority` hijacking, unlimited allowances, and domain spoofing.
+* **Deconstructs Transaction Wire Buffers**: Intercepts instructions before signing to detect `SetAuthority` hijacking, unlimited allowances, and domain spoofing directly from serialized payload opcodes.
 * **Provides a 360° Dual Perspective**:
   * **Modo Usuario Común**: Human-readable translation with a traffic-light security badge (🟢 Safe / 🟡 Warning / 🔴 Blocked) and visual balance simulation.
-  * **Modo Auditor / Ingeniero**: Deep AST tree, raw accounts, writable/signer privilege maps, and Anchor IDL signatures.
-* **On-Chain Attestation Registry**: An Anchor smart contract deployed on Solana Devnet that records security audit hashes and blacklists malicious threat signatures in an immutable ledger.
+  * **Modo Auditor / Ingeniero**: Deep instruction hierarchy, raw accounts, writable/signer privilege maps, and Anchor IDL signatures.
+* **On-Chain Attestation Registry**: An Anchor smart contract architecture designed for Solana (Devnet/Mainnet) to record security audit hashes and blacklist malicious threat signatures via Program Derived Addresses (PDAs).
 
 ---
 
@@ -46,7 +46,7 @@ flowchart TD
     end
 
     subgraph Sentinel["2. SolAgent Sentinel Engine"]
-        P1["AST Instruction Decompiler"]
+        P1["Wire-Format Instruction Decompiler"]
         R1["Anti-Drainer Rules Engine (SetAuthority / Approve)"]
         S1["Simulated Balance State Evaluator"]
         K1["Risk Scorer (0 - 100)"]
@@ -54,12 +54,12 @@ flowchart TD
 
     subgraph Perspectives["3. 360° Output Interfaces"]
         U1["👤 Modo Usuario Común<br/>(Semáforo, Lenguaje Natural, +/- Balances)"]
-        D1["🔬 Modo Auditor<br/>(AST Desglosado, Permisos, Hex/JSON)"]
+        D1["🔬 Modo Auditor<br/>(Instrucciones, Permisos, Hex/JSON)"]
         API["🤖 Agent Guard API<br/>(Pre-flight Middleware)"]
     end
 
-    subgraph OnChain["4. Solana Devnet"]
-        REG["Anchor Sentinel Registry<br/>(Sent7777...7777)"]
+    subgraph OnChain["4. Solana Architecture"]
+        REG["Anchor Sentinel Registry<br/>(PDA Attestations & Blacklist)"]
     end
 
     Input --> Sentinel
@@ -125,7 +125,7 @@ solagent-sentinel/
             └── src/lib.rs      # Global registry & attestation recorder
 ```
 
-## 🧪 Automated Security & Audit Suite (14/14 Passing)
+## 🧪 Automated Security & Audit Suite (19/19 Passing)
 
 Reproduce all deterministic heuristic and cybersecurity penetration tests locally:
 
@@ -136,7 +136,7 @@ node sentinel_audit_suite.js
 # 2. Run Dedicated Anti-Exploit Suite (SSRF Firewall, DoS payload limits, Math guards)
 node sentinel_security_vulnerability_audit.js
 
-# 3. Run Micro-Benchmark Suite (<0.05ms deterministic AST evaluation)
+# 3. Run Micro-Benchmark Suite (<0.05ms deterministic instruction evaluation)
 node autonomous_agent_integration_benchmark.js
 ```
 

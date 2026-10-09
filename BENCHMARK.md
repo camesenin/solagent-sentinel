@@ -1,6 +1,6 @@
 # SolAgent Sentinel — Benchmark & Performance Methodology
 
-This document outlines the performance benchmarks, test methodology, and reproducibility steps for **SolAgent Sentinel**'s transaction AST inspection engine.
+This document outlines the performance benchmarks, test methodology, and reproducibility steps for **SolAgent Sentinel**'s transaction wire-format inspection engine.
 
 ---
 
@@ -21,7 +21,7 @@ The benchmark evaluates the engine across five specific dimensions:
 5. **Zero-Crash Resilience & Fuzzing**: Feeds malformed base64, truncated buffers, empty strings, and poisoned JSON payloads to ensure 100% graceful handling with zero unhandled exceptions.
 
 > **Note on Network vs. Heuristic Latency**:  
-> The **0.028 ms – 0.070 ms** latency figures represent the **in-memory deterministic AST parsing and security heuristic evaluation**. They do not include external Solana RPC network roundtrips (which depend on regional RPC cluster latency, typically 10–100 ms).
+> The **0.028 ms – 0.070 ms** latency figures represent the **in-memory deterministic wire-format deserialization and security heuristic evaluation**. They do not include external Solana RPC network roundtrips (which depend on regional RPC cluster latency, typically 10–100 ms).
 
 ---
 
@@ -31,7 +31,7 @@ Conducted using `autonomous_agent_integration_benchmark.js` on Node.js (v20+):
 
 | Test Vector | Sample Size / Operations | Result | Average Latency |
 | :--- | :--- | :--- | :--- |
-| **Legitimate Swaps (Jupiter AST)** | 25 continuous runs | 25/25 Approved (0 False Positives) | **0.028 ms** |
+| **Legitimate Swaps (Jupiter Tree)** | 25 continuous runs | 25/25 Approved (0 False Positives) | **0.028 ms** |
 | **Adversarial Drainer Interception** | `SetAuthority` Hijack | Blocked (`CRITICAL_BLOCKED`, Score 15) | **0.038 ms** |
 | **Immunization Fast-Path** | Cache Hit on Threat Hash | Blocked (`THREAT_IMMUNIZATION_HIT`) | **0.004 ms** |
 | **Batch Concurrency** | 50 Concurrent Promises | 50/50 Evaluated | **< 0.050 ms / tx** |
